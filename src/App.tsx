@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import GameScreen from "./screens/GameScreen";
+import Singleplayer from "./screens/Singleplayer";
+import { BrowserRouter, Redirect, Route } from "react-router-dom";
+import { Switch } from "react-router-dom";
+import MainMenu from "./screens/MainMenu";
+import Multiplayer from "./screens/Multiplayer";
+import Leaderboard from "./screens/Leaderboard";
 
 const theme = extendTheme({
   styles: {
@@ -16,7 +21,16 @@ const theme = extendTheme({
 const App = () => {
   return (
     <ChakraProvider theme={theme}>
-      <GameScreen />
+      <BrowserRouter>
+        <Switch>
+          <Route path="/singleplayer" component={Singleplayer} />
+          <Route path="/multiplayer/:id" component={Multiplayer} />
+          <Route path="/home" component={MainMenu} />
+          {/* <Route path="/leaderboard" component={Leaderboard} /> */}
+
+          <Redirect from="***" exact={true} to={"/home"} />
+        </Switch>
+      </BrowserRouter>
     </ChakraProvider>
   );
 };

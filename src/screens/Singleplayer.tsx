@@ -1,8 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Input,
+  InputGroup,
+  InputRightAddon,
+  InputRightElement,
+  Text,
+} from "@chakra-ui/react";
 import randomWords from "random-words";
+import TextTypingContainer from "../components/TextTypingContainer";
+import BackButton from "../components/BackButton";
 
-const GameScreen = () => {
+declare global {
+  interface Window {
+    myTimer: any;
+  }
+}
+
+const Singleplayer = () => {
   const [begin, setBegin] = useState(false);
   const [timer, setTimer] = useState<any>(60);
   const [wordList, setWordList] = useState<Array<string | undefined>>(
@@ -12,13 +29,12 @@ const GameScreen = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [correctWords, setCorrectWords] = useState(0);
   const [incorrectWords, setIncorrectWords] = useState(0);
+  const [wordsPerMinute, setWordsPerMinute] = useState(0);
 
   const checkWord = () => {
     if (wordList[currentWordIndex] === currentInput.trim()) {
-      console.log(true, currentWordIndex);
       setCorrectWords(correctWords + 1);
     } else {
-      console.log(false, currentWordIndex);
       setIncorrectWords(incorrectWords + 1);
     }
 
@@ -32,15 +48,25 @@ const GameScreen = () => {
     }
   };
 
+  const restartGame = () => {
+    clearInterval(window.myTimer);
+    setTimer(60);
+    setBegin(false);
+    setCurrentWordIndex(0);
+    setCurrentInput("");
+    setWordList(randomWords(50));
+  };
+
   const startTimer = () => {
     setBegin(true);
+    setCorrectWords(0);
+    setIncorrectWords(0);
+    setWordsPerMinute(0);
 
-    const timerInterval = setInterval(() => {
+    window.myTimer = setInterval(() => {
       setTimer((previous: any) => {
         if (previous === 0) {
-          clearInterval(timerInterval);
-          setTimer(60);
-          setBegin(false);
+          restartGame();
         } else {
           return previous - 1;
         }
@@ -48,52 +74,35 @@ const GameScreen = () => {
     }, 1000);
   };
 
+  useEffect(() => {
+    if (currentWordIndex === wordList.length) {
+      restartGame();
+    }
+
+    if (begin && timer < 60) {
+      setWordsPerMinute(
+        Math.round(((correctWords + incorrectWords) * 60) / (60 - timer))
+      );
+    }
+  }, [currentWordIndex, timer]);
+
   return (
-    <Flex flexDir="column" w="100%" h="100vh" alignItems="center" mt="50px">
-      <Flex mb={30} flexDir="column" alignItems="center">
-        <Text color="white" fontSize={28}>
-          {timer}
-          {"s"}
-        </Text>
-        {!begin && <Button onClick={startTimer}>Start</Button>}
-      </Flex>
+    <Flex flexDir="column" w="100%" h="100vh" alignItems="center" pt="50px">
+      <BackButton />
 
-      <Flex
-        flexDir="row"
-        w="60%"
-        h={300}
-        flexWrap="wrap"
-        p={3}
-        border="2px solid #fff"
-        mb="70px"
-      >
-        {wordList.map((word, i) => (
-          <Flex key={i} pl={2}>
-            {word?.split("").map((char, charIdx) => (
-              <Flex
-                key={charIdx}
-                bgColor={currentWordIndex === i ? "white" : "transparent"}
-              >
-                <Text fontSize={30} color={"gray"}>
-                  {char}
-                </Text>
-              </Flex>
-            ))}
-          </Flex>
-        ))}
-      </Flex>
+      <Text color="white" fontSize={28} mb={30}>
+        {timer}
+        {"s"}
+      </Text>
 
-      <Input
-        autoFocus={true}
-        disabled={!begin}
-        w="60%"
-        h={50}
-        mb={50}
-        color="white"
-        fontSize={20}
-        onKeyDown={handleKeyDown}
-        value={currentInput}
-        onChange={(e) => setCurrentInput(e.target.value)}
+      <TextTypingContainer
+        begin={begin}
+        currentInput={currentInput}
+        currentWordIndex={currentWordIndex}
+        handleKeyDown={handleKeyDown}
+        setCurrentInput={setCurrentInput}
+        startTimer={startTimer}
+        wordList={wordList}
       />
 
       <Flex
@@ -104,7 +113,7 @@ const GameScreen = () => {
       >
         <Flex flexDir="column" alignItems="center">
           <Text fontSize={23} color="white">
-            {Math.round((correctWords * 60) / (60 - timer))}
+            {wordsPerMinute}
           </Text>
           <Text fontSize={23} color="white">
             WPM
@@ -112,11 +121,11 @@ const GameScreen = () => {
         </Flex>
         <Flex flexDir="column" alignItems="center">
           <Text fontSize={23} color="white">
-            {correctWords && incorrectWords
+            {correctWords || incorrectWords
               ? Math.round(
                   (correctWords / (correctWords + incorrectWords)) * 100
                 )
-              : 100}
+              : 0}
             %
           </Text>
           <Text fontSize={23} color="white">
@@ -128,4 +137,4 @@ const GameScreen = () => {
   );
 };
 
-export default GameScreen;
+export default Singleplayer;
