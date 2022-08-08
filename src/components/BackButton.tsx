@@ -6,14 +6,21 @@ const BackButton = () => {
       pos="absolute"
       top={10}
       left={5}
-      bgColor="white"
+      _hover={{ backgroundColor: "gray" }}
+      borderColor="#fff"
+      borderWidth={4}
       borderRadius="100%"
       cursor="pointer"
       onClick={() => {
         window.history.back();
       }}
     >
-      <Image src={require("../assets/back-button.png")} w="60px" h="60px" />
+      <Image
+        src={require("../assets/back-button.png")}
+        padding={2}
+        w="60px"
+        h="60px"
+      />
     </Flex>
   );
 };

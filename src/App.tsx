@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import Singleplayer from "./screens/Singleplayer";
 import { BrowserRouter, Redirect, Route } from "react-router-dom";
 import { Switch } from "react-router-dom";
-import MainMenu from "./screens/MainMenu";
 import Multiplayer from "./screens/Multiplayer";
-import Leaderboard from "./screens/Leaderboard";
+import GameRoom from "./screens/GameRoom";
 
 const theme = extendTheme({
   styles: {
@@ -23,12 +21,10 @@ const App = () => {
     <ChakraProvider theme={theme}>
       <BrowserRouter>
         <Switch>
-          <Route path="/singleplayer" component={Singleplayer} />
-          <Route path="/multiplayer/:id" component={Multiplayer} />
-          <Route path="/home" component={MainMenu} />
-          {/* <Route path="/leaderboard" component={Leaderboard} /> */}
+          <Route path="/multiplayer" component={Multiplayer} />
+          <Route path="/game/:id" component={GameRoom} />
 
-          <Redirect from="***" exact={true} to={"/home"} />
+          <Redirect from="***" exact={true} to={"/multiplayer"} />
         </Switch>
       </BrowserRouter>
     </ChakraProvider>
