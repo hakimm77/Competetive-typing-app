@@ -4,7 +4,8 @@ const http = require("http");
 const cors = require("cors");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-const randomWords = require("random-words");
+const { addPlayer } = require("./controllers/addPlayer");
+const { removePlayer } = require("./controllers/removePlayer");
 
 const PORT = process.env.PORT || 4000;
 
@@ -19,24 +20,15 @@ server.listen(PORT, () => {
 });
 
 let rooms = [];
-const wordList = randomWords(50);
 
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.on("join", (room) => {
-    socket.join(room);
-    console.log(`user joined ${room}`);
-    socket.emit("room", room);
-    socket.emit("words", wordList);
+  socket.on("new-player", (newPlayer) => {
+    addPlayer(newPlayer, io, socket, rooms);
   });
 
-  socket.on("start", (room) => {
-    socket.to(room).emit("start");
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+  socket.on("disconnect", async () => {
+    await removePlayer(io, socket, rooms);
   });
 });
-server;

@@ -16,7 +16,7 @@ export const InviteComponent = ({ roomID }: { roomID: string }) => {
   return (
     <Flex flexDir="column" alignItems="center">
       <Text color="#fff" fontFamily="Russo One" fontSize={25} mb={10}>
-        Invite your friend using this code
+        Invite your friend using this link
       </Text>
 
       <Flex

@@ -7,14 +7,6 @@ import generateId from "../helpers/generateId";
 const Multiplayer = () => {
   const [roomID, setRoomID] = useState<string>(generateId());
 
-  // useEffect(() => {
-  //   socket.on("update-room", async (res) => {
-  //     if (res) {
-  //       setPlayers(res);
-  //     }
-  //   });
-  // }, []);
-
   return (
     <Flex flexDir="column" height="100vh" alignItems="center">
       <motion.div
