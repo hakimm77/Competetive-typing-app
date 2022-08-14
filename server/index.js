@@ -7,33 +7,30 @@ const io = require("socket.io")(server);
 const { addPlayer } = require("./controllers/addPlayer");
 const { removePlayer } = require("./controllers/removePlayer");
 const { addCorrectWords } = require("./controllers/addCorrectWords");
-const { addWrittenWords } = require("./controllers/");
+const { addWrittenWords } = require("./controllers/addWrittenWords");
 
 const PORT = process.env.PORT || 4000;
-
-app.use(cors());
 let rooms = [];
 
-app.get("/", (req, res) => {
-  //  res.send("hello world");
-  io.on("connection", (socket) => {
-    console.log("a user connected");
+app.use(cors());
 
-    socket.on("new-player", (newPlayer) => {
-      addPlayer(newPlayer, io, socket, rooms);
-    });
+io.on("connection", (socket) => {
+  console.log("a user connected");
 
-    socket.on("add-correct-words", (roomInfo) => {
-      addCorrectWords(roomInfo, io, rooms);
-    });
+  socket.on("new-player", (newPlayer) => {
+    addPlayer(newPlayer, io, socket, rooms);
+  });
 
-    socket.on("add-written-words", (roomInfo) => {
-      addWrittenWords(roomInfo, io, rooms);
-    });
+  socket.on("add-correct-words", (roomInfo) => {
+    addCorrectWords(roomInfo, io, rooms);
+  });
 
-    socket.on("disconnect", async () => {
-      await removePlayer(io, socket, rooms);
-    });
+  socket.on("add-written-words", (roomInfo) => {
+    addWrittenWords(roomInfo, io, rooms);
+  });
+
+  socket.on("disconnect", async () => {
+    await removePlayer(io, socket, rooms);
   });
 });
 
