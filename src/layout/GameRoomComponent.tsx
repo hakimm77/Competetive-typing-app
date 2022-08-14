@@ -1,50 +1,92 @@
-import { Flex, Input, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { Checkbox, Flex, Input, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { TypingInput } from "../components/TypingInput";
-import { PlayerType } from "../types/Player";
+import { PlayerType, status } from "../types/Player";
 
 export const GameRoomComponent = ({
   players,
   playerID,
   wordList,
+  addCorrectWords,
+  addWrittenWords,
 }: {
   players: PlayerType[];
   playerID: string;
   wordList: string[];
+  addCorrectWords: () => void;
+  addWrittenWords: () => void;
 }) => {
   const [wordListIndex, setWordListIndex] = useState(0);
-  const [currentText, setCurrentText] = useState<string>("");
-  const [writtenWords, setWrittenWords] = useState<any>({});
+  const [writtenWords, setWrittenWords] = useState<string[]>([]);
+  const [status, setStatus] = useState<status>("waiting");
 
-  const storeCurrentText = (text: string, keyCode: number | undefined) => {
-    if (keyCode === 32) {
-      const isWordCorrect = wordList[wordListIndex] === currentText;
-      setWrittenWords({
-        ...writtenWords,
-        [currentText]: { isCorrect: isWordCorrect },
-      });
-      setCurrentText("");
-      setWordListIndex(wordListIndex + 1);
-    }
+  const isWordCorrect = async (text: string) => {
+    let wordCorrect: boolean = wordList[wordListIndex] === text.trim();
 
-    setCurrentText(text);
+    if (wordCorrect) addCorrectWords();
+
+    await addWrittenWords();
+    setWrittenWords((previousWrittenWords: any) => [
+      ...previousWrittenWords,
+      wordCorrect.toString(),
+    ]);
+    setWordListIndex((previousIndex) => previousIndex + 1);
   };
+
+  const getWordColor = (idx: number) => {
+    return writtenWords[idx]
+      ? writtenWords[idx] === "true"
+        ? "#42fcad"
+        : "#ff0000"
+      : wordListIndex === idx
+      ? "#fff"
+      : "#6B7280";
+  };
+
+  useEffect(() => {
+    if (players.length === 2) {
+      setStatus("counting");
+    }
+  }, [players.length]);
+
+  useEffect(() => {
+    if (players.length) {
+      if (players[0]?.writtenWords === 50 || players[1]?.writtenWords === 50) {
+        setStatus("results");
+      }
+    }
+  }, [players.length, players]);
 
   return (
     <Flex flexDir="column" padding={20} alignItems="center" height="100vh">
       {playerID && (
         <>
           <Flex
-            flexDir="row"
+            flexDir={
+              players.findIndex((e) => e.id === playerID) === 0
+                ? "row"
+                : "row-reverse"
+            }
             width="80%"
             alignItems="center"
             justifyContent="space-between"
             mb={20}
           >
             {players.map((player, idx) => (
-              <Text color="#fff" fontSize={27} fontFamily="Russo One" key={idx}>
-                {player.id === playerID ? "You" : `Player ${player.id}`}
-              </Text>
+              <Flex flexDir="row" alignItems="center" key={idx}>
+                <Text color="#fff" fontSize={27} fontFamily="Russo One">
+                  {player.id === playerID ? "You" : `Player ${player.id}`}
+                </Text>
+
+                <Text
+                  color="#42fcad"
+                  fontSize={27}
+                  fontFamily="Russo One"
+                  pl={5}
+                >
+                  {player.correctWords} / 50
+                </Text>
+              </Flex>
             ))}
           </Flex>
 
@@ -60,27 +102,23 @@ export const GameRoomComponent = ({
               maxWidth="50%"
               flexWrap="wrap"
               mb={20}
+              borderWidth={2}
+              borderColor={status === "playing" ? "#fff" : "#6B7280"}
+              borderRadius={10}
             >
               {wordList.map((word, idx) => (
                 <Flex fontSize={25} paddingRight={3} fontWeight={400} key={idx}>
-                  <Text
-                    color={
-                      writtenWords[word]
-                        ? writtenWords[word].isCorrect
-                          ? "#fff"
-                          : "#ff0000"
-                        : "#6B7280"
-                    }
-                  >
-                    {word}
-                  </Text>
+                  <Text color={getWordColor(idx)}>{word}</Text>
                 </Flex>
               ))}
             </Flex>
 
             <TypingInput
-              storeCurrentText={storeCurrentText}
-              currentText={currentText}
+              isWordCorrect={isWordCorrect}
+              status={status}
+              changeStatus={setStatus}
+              players={players}
+              playerID={playerID}
             />
           </Flex>
         </>

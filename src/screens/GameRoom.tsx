@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { GameRoomComponent } from "../layout/GameRoomComponent";
 import { io } from "socket.io-client";
 import { PlayerType } from "../types/Player";
-import generateId from "../helpers/generateId";
 
-const socket = io("http://localhost:4000/");
+const socket = io(process.env.REACT_APP_SERVER_URL as string);
 
 const GameRoom = ({ match }: { match: any }) => {
   const [players, setPlayers] = useState<PlayerType[]>([]);
@@ -12,8 +11,26 @@ const GameRoom = ({ match }: { match: any }) => {
   const [roomID, setRoomID] = useState<string>(match.params.id);
   const [playerID, setPlayerID] = useState<string>("");
 
+  const addCorrectWords = () => {
+    socket.emit("add-correct-words", {
+      roomID: roomID,
+      playerIndex: players.findIndex((e) => e.id === playerID),
+    });
+  };
+
+  const addWrittenWords = () => {
+    socket.emit("add-written-words", {
+      roomID: roomID,
+      playerIndex: players.findIndex((e) => e.id === playerID),
+    });
+  };
+
   useEffect(() => {
-    socket.emit("new-player", { roomID: roomID });
+    socket.emit("new-player", {
+      roomID: roomID,
+      correctWords: 0,
+      writtenWords: 0,
+    });
   }, []);
 
   useEffect(() => {
@@ -21,22 +38,20 @@ const GameRoom = ({ match }: { match: any }) => {
       setPlayerID(socket.id);
 
       socket.on("players-update", async (room) => {
-        console.log("room", room);
         if (room) {
-          console.log("room", room);
           setPlayers(room.players);
         }
       });
 
-      socket.on("words", async (res) => {
-        if (res) {
-          setWordList(res);
+      socket.on("words", async (words) => {
+        if (words) {
+          setWordList(words);
         }
       });
 
-      socket.on("quit", async (res) => {
-        if (res) {
-          alert("Oponent quit");
+      socket.on("quit", async (quitReason) => {
+        if (quitReason) {
+          alert(quitReason);
           window.location.href = "/";
         }
       });
@@ -54,6 +69,8 @@ const GameRoom = ({ match }: { match: any }) => {
       players={players}
       playerID={playerID}
       wordList={wordList}
+      addCorrectWords={addCorrectWords}
+      addWrittenWords={addWrittenWords}
     />
   );
 };
