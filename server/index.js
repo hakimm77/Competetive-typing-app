@@ -3,7 +3,11 @@ const app = express();
 const http = require("http");
 const cors = require("cors");
 const server = http.createServer(app);
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
 const { addPlayer } = require("./controllers/addPlayer");
 const { removePlayer } = require("./controllers/removePlayer");
 const { addCorrectWords } = require("./controllers/addCorrectWords");
@@ -11,8 +15,6 @@ const { addWrittenWords } = require("./controllers/addWrittenWords");
 
 const PORT = process.env.PORT || 4000;
 let rooms = [];
-
-app.use(cors());
 
 io.on("connection", (socket) => {
   console.log("a user connected");

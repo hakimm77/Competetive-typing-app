@@ -5,7 +5,7 @@ import generateId from "../helpers/generateId";
 
 export const InviteComponent = ({ roomID }: { roomID: string }) => {
   const [roomLink, setRoomLink] = useState<string>(
-    `http://localhost:3000/game/${roomID}`
+    `https://typing-app-hakim.web.app/game/${roomID}`
   );
 
   const goToGame = async () => {

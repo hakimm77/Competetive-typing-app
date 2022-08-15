@@ -3,7 +3,7 @@ import { GameRoomComponent } from "../layout/GameRoomComponent";
 import { io } from "socket.io-client";
 import { PlayerType } from "../types/Player";
 
-const socket = io(process.env.REACT_APP_SERVER_URL as string);
+const socket = io("https://typing-app-hakim.herokuapp.com/");
 
 const GameRoom = ({ match }: { match: any }) => {
   const [players, setPlayers] = useState<PlayerType[]>([]);
